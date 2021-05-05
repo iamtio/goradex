@@ -1,9 +1,9 @@
 package main
 
-type RadexOneRequest interface {
+type Request interface {
 	Marshal() []byte
 }
-type BaseRequest struct {
+type PacketHeader struct {
 	Prefix          uint16 `pos:"0"`
 	Command         uint16 `pos:"2"`
 	ExtensionLength uint16 `pos:"4"`
@@ -12,15 +12,24 @@ type BaseRequest struct {
 	CheckSum0       uint16 `pos:"10"`
 }
 type DataReadRequest struct {
-	BaseRequest
+	PacketHeader
 	RequestType uint16 `pos:"0"`
 	Reserved1   uint16 `pos:"2"`
 	CheckSum1   uint16 `pos:"4"`
 }
 
+type DataReadResponse struct {
+	PacketHeader
+	RequestType uint16 `pos:"0"`
+	Ambient     uint16 `pos:"8"  le:"1"`
+	Accumulated uint16 `pos:"12" le:"1"`
+	CPM         uint16 `pos:"16" le:"1"` // 2560 - 10, 5376 -21, 4864 -19
+	CheckSum1   uint16 `pos:"20"`
+}
+
 func NewDataRequest(packetNum uint16) DataReadRequest {
 	drr := DataReadRequest{
-		BaseRequest: BaseRequest{
+		PacketHeader: PacketHeader{
 			Prefix:          0x7bff,
 			Command:         0x2000,
 			ExtensionLength: LEWord(0x0006),
@@ -39,7 +48,12 @@ func NewDataRequest(packetNum uint16) DataReadRequest {
 
 func (drr DataReadRequest) Marshal() []byte {
 	var buf []byte
-	buf = append(marshalStruct(drr.BaseRequest)[:], marshalStruct(drr)[:]...)
+	buf = append(marshalStruct(drr.PacketHeader)[:], marshalStruct(drr)[:]...)
 
 	return buf
+}
+
+func (drr *DataReadResponse) Unmarshal(packet []byte) {
+	unmarshalStruct(packet, &drr.PacketHeader)
+	unmarshalStruct(packet[11:], drr)
 }

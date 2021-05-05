@@ -49,3 +49,28 @@ func marshalStruct(i interface{}) []byte {
 	}
 	return buf
 }
+func unmarshalStruct(packet []byte, i interface{}) {
+	drrV := reflect.ValueOf(i).Elem()
+	drrT := drrV.Type()
+	for i := 0; i < drrV.NumField(); i++ {
+		pos := drrT.Field(i).Tag.Get("pos")
+		le := drrT.Field(i).Tag.Get("le")
+		if pos == "" {
+			continue
+		}
+		posInt, err := strconv.Atoi(pos)
+		if err != nil {
+			log.Printf("Can't parse pos for: %s\n", drrT.Field(i).Name)
+			continue
+		}
+		//TODO: Check buf len
+		var value uint16
+		if le != "" {
+			value = binary.BigEndian.Uint16(packet[posInt : posInt+2])
+		} else {
+			value = binary.LittleEndian.Uint16(packet[posInt : posInt+2])
+		}
+
+		drrV.Field(i).SetUint(uint64(value))
+	}
+}

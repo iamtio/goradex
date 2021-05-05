@@ -29,4 +29,8 @@ func main() {
 		result = append(result, buf[0])
 	}
 	fmt.Printf("<: % X\n", result)
+	resp := DataReadResponse{}
+	resp.Unmarshal(result)
+	fmt.Println(resp)
+	fmt.Printf("CPM: %d, Ambient: %d, Accumulated: %d", resp.CPM, resp.Ambient, resp.Accumulated)
 }
