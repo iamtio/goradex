@@ -1,4 +1,4 @@
-package main
+package radexone
 
 import (
 	"encoding/binary"
@@ -45,16 +45,19 @@ func marshalStruct(i interface{}) []byte {
 			log.Printf("Can't parse pos for: %s\n", typeField.Name)
 			continue
 		}
-		binary.BigEndian.PutUint16(buf[posInt:], uint16(drrV.Field(i).Uint()))
+		if drrT.Field(i).Tag.Get("le") == "" {
+			binary.BigEndian.PutUint16(buf[posInt:], uint16(drrV.Field(i).Uint()))
+		} else {
+			binary.LittleEndian.PutUint16(buf[posInt:], uint16(drrV.Field(i).Uint()))
+		}
 	}
 	return buf
 }
-func unmarshalStruct(packet []byte, i interface{}) {
+func unmarshalStruct(fragment []byte, i interface{}) {
 	drrV := reflect.ValueOf(i).Elem()
 	drrT := drrV.Type()
 	for i := 0; i < drrV.NumField(); i++ {
 		pos := drrT.Field(i).Tag.Get("pos")
-		le := drrT.Field(i).Tag.Get("le")
 		if pos == "" {
 			continue
 		}
@@ -63,12 +66,14 @@ func unmarshalStruct(packet []byte, i interface{}) {
 			log.Printf("Can't parse pos for: %s\n", drrT.Field(i).Name)
 			continue
 		}
-		//TODO: Check buf len
+		if posInt+2 > len(fragment) {
+			log.Fatalf("Insufficient bytes in packet fragment: has: %d of %d+2 required\n", len(fragment), posInt)
+		}
 		var value uint16
-		if le != "" {
-			value = binary.BigEndian.Uint16(packet[posInt : posInt+2])
+		if drrT.Field(i).Tag.Get("le") == "" {
+			value = binary.BigEndian.Uint16(fragment[posInt : posInt+2])
 		} else {
-			value = binary.LittleEndian.Uint16(packet[posInt : posInt+2])
+			value = binary.LittleEndian.Uint16(fragment[posInt : posInt+2])
 		}
 
 		drrV.Field(i).SetUint(uint64(value))

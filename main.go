@@ -5,12 +5,13 @@ import (
 	"log"
 	"time"
 
+	"github.com/iamtio/goradex/radexone"
 	"github.com/tarm/serial"
 )
 
 func main() {
 	fmt.Println("Starting...")
-	drr := NewDataRequest(0)
+	drr := radexone.NewDataRequest(0)
 	encoded := drr.Marshal()
 
 	c := &serial.Config{Name: "COM9", Baud: 9600, ReadTimeout: time.Millisecond * 100}
@@ -29,8 +30,7 @@ func main() {
 		result = append(result, buf[0])
 	}
 	fmt.Printf("<: % X\n", result)
-	resp := DataReadResponse{}
+	resp := radexone.DataReadResponse{}
 	resp.Unmarshal(result)
-	fmt.Println(resp)
 	fmt.Printf("CPM: %d, Ambient: %d, Accumulated: %d", resp.CPM, resp.Ambient, resp.Accumulated)
 }
