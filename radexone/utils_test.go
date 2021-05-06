@@ -7,7 +7,6 @@ import (
 	radexone "github.com/iamtio/goradex/radexone"
 )
 
-//https://github.com/mwwhited/BinaryDataDecoders/blob/master/src/BinaryDataDecoders.Quarta.RadexOne/Notes.md
 func TestChecksum(t *testing.T) {
 	cs := radexone.CalcChecksum(0x7bff, 0x2000, 0x0600, 0x4e01)
 	if cs != 0x0fff {

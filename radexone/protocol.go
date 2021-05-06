@@ -1,3 +1,16 @@
+/*
+
+Usage
+
+Make measures request packet
+ drr := radexone.NewDataRequest(0)
+ encoded := drr.Marshal() // encoded now contains []byte to send
+
+Parse measures response packet
+ resp := radexone.DataReadResponse{}
+ resp.Unmarshal(buf) // buf is received []byte
+ fmt.Printf("CPM: %d, Ambient: %d, Accumulated: %d", resp.CPM, resp.Ambient, resp.Accumulated)
+*/
 package radexone
 
 import (
@@ -62,9 +75,7 @@ func NewDataRequest(packetNum uint16) DataReadRequest {
 //  encoded := drr.Marshal()
 //  ...
 func (drr DataReadRequest) Marshal() []byte {
-	var buf []byte
-	buf = append(marshalStruct(drr.PacketHeader)[:], marshalStruct(drr)[:]...)
-	return buf
+	return append(marshalStruct(drr.PacketHeader)[:], marshalStruct(drr)[:]...)
 }
 
 // Decode packet
