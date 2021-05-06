@@ -30,7 +30,7 @@ var measureCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf(">: % X\n", encoded)
+		// fmt.Printf(">: % X\n", encoded)
 		s.Write(encoded)
 		buf := make([]byte, 1)
 		var result []byte
@@ -40,10 +40,10 @@ var measureCmd = &cobra.Command{
 			}
 			result = append(result, buf[0])
 		}
-		fmt.Printf("<: % X\n", result)
+		// fmt.Printf("<: % X\n", result)
 		resp := radexone.DataReadResponse{}
 		resp.Unmarshal(result)
-		fmt.Printf("CPM: %d, Ambient: %d, Accumulated: %d", resp.CPM, resp.Ambient, resp.Accumulated)
+		fmt.Printf("CPM: %d, Ambient: %d, Accumulated: %d\n", resp.CPM, resp.Ambient, resp.Accumulated)
 
 	},
 }
