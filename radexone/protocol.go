@@ -4,9 +4,11 @@ import (
 	"log"
 )
 
-type Request interface {
-	Marshal() []byte
-}
+// type Request interface {
+// 	Marshal() []byte
+// }
+
+// Common packet header. Used in requests and responses
 type PacketHeader struct {
 	Prefix          uint16 `pos:"0"`
 	Command         uint16 `pos:"2"`
@@ -15,6 +17,8 @@ type PacketHeader struct {
 	Reserved0       uint16 `pos:"8"`
 	CheckSum0       uint16 `pos:"10"`
 }
+
+// Packet for requesting current measures from radex one
 type DataReadRequest struct {
 	PacketHeader
 	RequestType uint16 `pos:"0"`
@@ -22,6 +26,7 @@ type DataReadRequest struct {
 	CheckSum1   uint16 `pos:"4"`
 }
 
+// Packet response with radex one measures
 type DataReadResponse struct {
 	PacketHeader
 	RequestType uint16 `pos:"0"`
@@ -32,6 +37,7 @@ type DataReadResponse struct {
 	CheckSum1   uint16 `pos:"20"`
 }
 
+// Create packet for requesting measures from radex one. Fills required fields and calculates checksums
 func NewDataRequest(packetNum uint16) DataReadRequest {
 	drr := DataReadRequest{
 		PacketHeader: PacketHeader{
@@ -51,12 +57,20 @@ func NewDataRequest(packetNum uint16) DataReadRequest {
 	return drr
 }
 
+// Get bytes of packet
+//  drr := radexone.NewDataRequest(0)
+//  encoded := drr.Marshal()
+//  ...
 func (drr DataReadRequest) Marshal() []byte {
 	var buf []byte
 	buf = append(marshalStruct(drr.PacketHeader)[:], marshalStruct(drr)[:]...)
 	return buf
 }
 
+// Decode packet
+//  resp := radexone.DataReadResponse{}
+//  resp.Unmarshal(buf)
+//  fmt.Printf("CPM: %d, Ambient: %d, Accumulated: %d", resp.CPM, resp.Ambient, resp.Accumulated)
 func (drr *DataReadResponse) Unmarshal(packet []byte) {
 	unmarshalStruct(packet, &drr.PacketHeader)
 	if cs := CalcChecksum(drr.Prefix, drr.Command, LEWord(drr.ExtensionLength), LEWord(drr.PacketNumber), drr.Reserved0); cs != drr.CheckSum0 {

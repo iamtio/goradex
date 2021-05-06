@@ -7,6 +7,7 @@ import (
 	"strconv"
 )
 
+// Calculate radex one checksum for fields
 func CalcChecksum(fields ...uint16) uint16 {
 	var sum uint16
 	for _, n := range fields {
@@ -14,8 +15,10 @@ func CalcChecksum(fields ...uint16) uint16 {
 	}
 	return (0xffff - sum) % 0xffff
 }
+
+// Swap bytes in word.
 func LEWord(value uint16) uint16 {
-	return value<<8 | value>>8 //0xAABB => 0xBBAA
+	return value<<8 | value>>8
 }
 func marshalStruct(i interface{}) []byte {
 	drrV := reflect.ValueOf(i)

@@ -1,6 +1,7 @@
 package radexone_test
 
 import (
+	"fmt"
 	"testing"
 
 	radexone "github.com/iamtio/goradex/radexone"
@@ -38,4 +39,13 @@ func TestLEWord(t *testing.T) {
 	if radexone.LEWord(0x0101) != 0x0101 {
 		t.Fatalf("Can't swap bytes")
 	}
+}
+func ExampleLEWord() {
+	fmt.Printf("%X", radexone.LEWord(0x00FF))
+	// Output: FF00
+}
+
+func ExampleCalcChecksum() {
+	fmt.Printf("%X", radexone.CalcChecksum(0x7aff, 0x2080, 0x0600, 0x4e01))
+	// Output: 107F
 }
