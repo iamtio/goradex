@@ -1,3 +1,4 @@
+![radex](https://user-images.githubusercontent.com/597141/117556879-3d89c280-b076-11eb-907f-128f41a50eb1.jpg)
 # What is it?
 This project is a CLI appliction to control Quarta Radex One personal dosimeter.
 
