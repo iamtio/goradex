@@ -2,12 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-	"time"
 
 	"github.com/iamtio/goradex/radexone"
 	"github.com/spf13/cobra"
-	"github.com/tarm/serial"
 )
 
 // measureCmd represents the measure command
@@ -22,29 +19,12 @@ var measureCmd = &cobra.Command{
 	// This application is a tool to generate the needed files
 	// to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		drr := radexone.NewDataRequest(0)
-		encoded := drr.Marshal()
-
-		c := &serial.Config{Name: serialPort, Baud: serialBaud, ReadTimeout: time.Millisecond * 100}
-		s, err := serial.OpenPort(c)
-		if err != nil {
-			log.Fatal(err)
+		handler := radexone.MeasureHandler{
+			SerialPort: serialPort,
+			SerialBaud: serialBaud,
 		}
-		// fmt.Printf(">: % X\n", encoded)
-		s.Write(encoded)
-		buf := make([]byte, 1)
-		var result []byte
-		for {
-			if n, err := s.Read(buf); err != nil || n == 0 {
-				break
-			}
-			result = append(result, buf[0])
-		}
-		// fmt.Printf("<: % X\n", result)
-		resp := radexone.DataReadResponse{}
-		resp.Unmarshal(result)
-		fmt.Printf("CPM: %d, Ambient: %d, Accumulated: %d\n", resp.CPM, resp.Ambient, resp.Accumulated)
-
+		resp := handler.GetValues()
+		fmt.Printf("CPM: %d, Ambient: %.2f μSv/h, Accumulated: %.2f μSv\n", resp.CPM, resp.Ambient, resp.Accumulated)
 	},
 }
 
