@@ -20,6 +20,12 @@ To fix this behavior you can run these commands:
     sudo modprobe cp210x
     # Forcing driver to device match
     sudo sh -c 'echo abba a011 > /sys/bus/usb-serial/drivers/cp210x/new_id'
+
+Or create file `/etc/udev/rules.d/98-radex.rules`
+to persist these changes after reboot
+
+    ACTION=="add", ATTRS{idVendor}=="abba", ATTRS{idProduct}=="a011", RUN+="/sbin/modprobe cp210x", RUN+="/bin/sh -c 'echo abba a011 > /sys/bus/usb-serial/drivers/cp210x/new_id'"
+
 Tested on:
 - Ubuntu 20.04 LTS
 - Ubuntu 22.04 LTS
